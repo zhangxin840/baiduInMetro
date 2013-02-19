@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ASP.NET Web API</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link href="../Content/Site.css" rel="stylesheet" />
+    <script src="../Scripts/jquery-1.7.1.min.js" type="text/javascript">
+    </script>
+</head>
+<body id="body" >       
+            <div class="result"></div>
+<script>
+    var tags;
+    var resultContainer;
+    var relatedSearch;
+
+    $(document).ready(function () {
+        // Send an AJAX request
+        $.get('/api/proxy?url=http://www.baidu.com/s?wd=医疗器械', function (data) {
+            tags = $(data);
+
+            // Remove style attributes
+            tags.find("*").removeAttr("style").removeAttr("color").removeAttr("size");
+
+            results = tags.find("div#container div#content_left table");
+
+            // Remove promotions
+            results = results.not("table.ec_pp_f");
+
+
+            relatedSearch = tags.find("div#rs");
+ 
+            $('.result').html(results);
+        });
+    });
+</script>
+</body>
+
+</html>
