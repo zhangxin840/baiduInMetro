@@ -39,6 +39,12 @@
 			/*			font-family: 'Segoe UI',Tahoma,Arial,Helvetica,sans-serif;*/
 		}
 
+	    #searchResults {
+            margin-top:30px;
+	        height:300px;
+            overflow:auto;
+        }
+
 		h3 {
 			font-family: "微软雅黑", "宋体", "黑体", Arial;
 		}
@@ -93,12 +99,14 @@
 		<script type="text/javascript" src="js/bootmetro.js"></script>
 		<script type="text/javascript" src="js/bootmetro-charms.js"></script>
 
+        <script type="text/javascript" src="js/jquery.nicescroll.js"></script>
+
 		<script type="text/javascript">
 			$(".metro").metro();
 		</script>
 	</body>
 	<script type="text/javascript">
-	    var container = $('div#searchResults');
+	    
 
         // YQL AJAX
 		function doAjax(url) {
@@ -115,7 +123,8 @@
 				$('#target').load(url);
 			}
 		}
-        
+
+		var container = $('div#searchResults');
 		var tags;
 		var resultContainer;
 		var relatedSearch;
@@ -125,15 +134,13 @@
 		var getSearchResult = function (Url) {
 		    $.get('/api/proxy?url=http://www.baidu.com/s?wd=' + Url, function (data) {
 		        tags = $(data);
-
-		        // Remove style attributes
-		        tags.find("*").removeAttr("style").removeAttr("color").removeAttr("size");
-                // Remove style tags
-		        tags.find("style").remove();
-		        // Remove script tags
-		        //tags.find("script").remove();
-
-		        scriptTags = tags.find("script");
+		        
+		        // Get script tags
+		        scriptTags = tags.filter("script").add(tags.find("script"));
+		        //scriptTags.each(function () {
+		        //    console.log($(this));
+		        //    appendScript($(this));
+		        //});
 
 		        results = tags.find("div#container div#content_left>table");
 
@@ -141,16 +148,42 @@
 		        results = results.not("table.ec_pp_f");
 		        results = results.not("table.EC_mr15");
 
-		        relatedSearch = tags.find("div#rs");
-
+		        results = removeStyles(results);
 		        container.html(results);
-		        container.append(scriptTags);
+
+		        relatedSearch = tags.find("div#rs");
+		        //container.append(scriptTags);
 		    });
+		};
+
+		var appendScript = function (scriptTags) {
+		    var result = "";
+		    scriptTags.each(function () {
+		        result += $(this).html();
+		    });
+
+		    var script = document.createElement("script");
+		    script.type = "text/javascript";
+		    script.text = result;              
+		    document.body.appendChild(script);
 		}
+
+	    // Remove styles from jQuery tag array and their descendants
+		var removeStyles = function (tags) {
+		    // Remove style attributes
+		    tags.removeAttr("style").removeAttr("color").removeAttr("size");
+		    tags.find("*").removeAttr("style").removeAttr("color").removeAttr("size");
+		    // Remove style tags
+		    tags = tags.not("style");
+		    tags.find("style").remove();
+		    return tags;
+		};
+                
+                
 
 
 		    $(function() {
-		        getSearchResult("医疗器械");
+		        getSearchResult("百度搜索");
 		        $("input#searchButton").click(function () {
 		            var keyword = $("input#keyword").val();
 		            container.children().fadeOut(function () {
@@ -158,6 +191,8 @@
 		                getSearchResult(keyword);
 		            });
 		        });
+
+		        container.niceScroll();
 		    });
 
 
